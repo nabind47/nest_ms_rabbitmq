@@ -1,6 +1,7 @@
 import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
-import { Controller, Get } from '@nestjs/common';
-import { RmqService } from '@app/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
+
+import { JwtAuthGuard, RmqService } from '@app/common';
 
 import { BillingService } from './billing.service';
 
@@ -9,7 +10,7 @@ export class BillingController {
   constructor(
     private readonly billingService: BillingService,
     private readonly rmqService: RmqService,
-  ) {}
+  ) { }
 
 
   @Get()
@@ -17,7 +18,7 @@ export class BillingController {
     return this.billingService.getHello();
   }
   @EventPattern('order_created')
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async handleOrderCreated(@Payload() data: any, @Ctx() context: RmqContext) {
     this.billingService.bill(data);
     // this.rmqService.ack(context);
